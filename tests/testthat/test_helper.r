@@ -1,0 +1,12 @@
+library(testthat)
+test_that("fmt_si formats numbers to K and M", {
+  expect_equal(fmt_si(1500), "1.5 K")
+  expect_equal(fmt_si(2500000), "2.5 M")
+  expect_equal(fmt_si(12), "12")
+  expect_equal(fmt_si(1000), "1 K")
+  res_vec <- fmt_si(c(500, 1500, 2500000))
+  expect_true(is.character(res_vec))
+  expect_equal(res_vec[1], "500")
+  expect_equal(res_vec[2], "1.5 K")
+  expect_equal(res_vec[3], "2.5 M")
+})

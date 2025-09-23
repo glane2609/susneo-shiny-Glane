@@ -1,0 +1,23 @@
+Package: SUSNEO
+Title: SUSNEO Energy & Emissions Shiny App
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Glane",
+           family = "Gonsalves",
+           role = c("aut", "cre"),
+           email = "glane.gonsalves9@email.com")
+Description: A modular Shiny dashboard for analyzing energy consumption and carbon emissions,
+    with golem-style structure, R6 business logic, unit tests, and CI pipeline.
+License: MIT
+Imports: 
+    shiny,
+    dplyr,
+    ggplot2,
+    DT,
+    lubridate,
+    R6,
+    pkgload,
+    testthat
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
