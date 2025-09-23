@@ -1,23 +1,19 @@
-name: R-CI
+name: R-CI-Windows
 
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # handy to be able to run manually
+  workflow_dispatch:   # so you can run manually
 
 jobs:
   R-CMD-check:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: windows-latest
     timeout-minutes: 60
 
-    # Use runtime runner temp via environment variable (no ${{ runner.* }} expression)
     env:
-      R_LIBS_USER: $RUNNER_TEMP/Library
+      R_LIBS_USER: ${{ github.workspace }}\\RLibrary
 
     steps:
       - name: Checkout repository
@@ -32,31 +28,24 @@ jobs:
       - name: Cache R packages
         uses: actions/cache@v4
         with:
-          path: $RUNNER_TEMP/Library
-          # keep key deterministic across OS and package set
-          key: ${{ runner.os }}-r-4.3.3-lib-${{ hashFiles('**/DESCRIPTION') }}
+          path: ${{ github.workspace }}\\RLibrary
+          key: windows-r-4.3.3-lib-${{ hashFiles('**/DESCRIPTION') }}
           restore-keys: |
-            ${{ runner.os }}-r-4.3.3-lib-
-
-      - name: Install system dependencies (Linux only)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y libxml2-dev libssl-dev libcurl4-openssl-dev
+            windows-r-4.3.3-lib-
 
       - name: Install R package tooling
         run: |
-          Rscript -e 'options(repos = c(CRAN = "https://cran.rstudio.com")); install.packages(c("remotes","pkgload","testthat","covr"))'
+          Rscript -e "options(repos = c(CRAN = 'https://cran.rstudio.com')); install.packages(c('remotes','pkgload','testthat','covr'))"
 
       - name: Install package dependencies
         run: |
-          Rscript -e 'remotes::install_deps(dependencies = TRUE)'
+          Rscript -e "remotes::install_deps(dependencies = TRUE)"
 
       - name: Run unit tests (pkgload + testthat)
         run: |
           Rscript -e "library(pkgload); library(testthat);
                        pkgload::load_all(export_all = TRUE, helpers = TRUE);
-                       testthat::test_dir('tests/testthat')"
+                       testthat::test_dir('tests/testthat/')"
 
       - name: Run R CMD check
         uses: r-lib/actions/check-r-package@v4
