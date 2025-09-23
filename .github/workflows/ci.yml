@@ -35,7 +35,7 @@ jobs:
 
       - name: Install R package tooling
         run: |
-          Rscript -e "options(repos = c(CRAN = 'https://cran.rstudio.com')); install.packages(c('remotes','pkgload','testthat','covr'))"
+          Rscript -e "options(repos = c(CRAN = 'https://cran.rstudio.com')); install.packages(c('remotes','pkgload','testthat','covr','rcmdcheck'))"
 
       - name: Install package dependencies
         run: |
