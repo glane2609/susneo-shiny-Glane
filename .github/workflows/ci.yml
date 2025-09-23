@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:   # so you can run manually
+  workflow_dispatch:
 
 jobs:
   R-CMD-check:
@@ -45,10 +45,10 @@ jobs:
         run: |
           Rscript -e "library(pkgload); library(testthat);
                        pkgload::load_all(export_all = TRUE, helpers = TRUE);
-                       testthat::test_dir('tests/testthat/')"
+                       testthat::test_dir('tests/testthat')"
 
       - name: Run R CMD check
-        uses: r-lib/actions/check-r-package@v4
+        uses: r-lib/actions/check-r-package@v2
         with:
           args: --no-manual --as-cran
 
