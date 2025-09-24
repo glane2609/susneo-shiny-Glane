@@ -10,6 +10,7 @@ Description: A modular Shiny dashboard for analyzing energy consumption and carb
     with golem-style structure, R6 business logic, unit tests, and CI pipeline.
 License: MIT
 Imports: 
+    golem, 	
     shiny,
     dplyr,
     ggplot2,
