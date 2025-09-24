@@ -13,7 +13,6 @@ jobs:
     timeout-minutes: 60
 
     env:
-      # keep packages in workspace to persist cache reliably
       R_LIBS_USER: ${{ github.workspace }}\\RLibrary
 
     steps:
@@ -25,6 +24,8 @@ jobs:
         with:
           r-version: '4.3.3'
           use-public-rspm: true
+          # optionally set rtools-version if your package or deps need compilation:
+          # rtools-version: '4.3'
 
       - name: Cache R packages
         uses: actions/cache@v4
@@ -34,43 +35,22 @@ jobs:
           restore-keys: |
             windows-r-4.3.3-lib-
 
-      - name: Install tooling and dependencies
-        shell: pwsh
+      - name: Install R package tooling
         run: |
-          Write-Host "Install rcmdcheck and developer tooling"
-          Rscript -e "options(repos='https://cran.rstudio.com'); install.packages(c('rcmdcheck','remotes','pkgload','testthat','covr'), dependencies = TRUE)"
-          Write-Host "Install package dependencies from DESCRIPTION"
+          Rscript -e "options(repos = c(CRAN = 'https://cran.rstudio.com')); install.packages(c('remotes','pkgload','testthat','covr','rcmdcheck'))"
+
+      - name: Install package dependencies
+        run: |
           Rscript -e "remotes::install_deps(dependencies = TRUE)"
 
-      - name: Show workspace (debug)
-        shell: pwsh
+      - name: Run unit tests (pkgload + testthat)
         run: |
-          Write-Host "GITHUB_WORKSPACE: $env:GITHUB_WORKSPACE"
-          Set-Location $env:GITHUB_WORKSPACE
-          Write-Host "Top-level listing:"
-          ls -Force
+          Rscript -e "pkgload::load_all(export_all = FALSE, helpers = TRUE, attach_testthat = FALSE)"
+          Rscript -e "if (file.exists('tests/test_all.R')) { message('Sourcing tests/test_all.R'); source('tests/test_all.R') } else { message('Running testthat on tests/testthat'); testthat::test_dir('tests/testthat', reporter = 'summary') }"
 
-      - name: Run developer-style tests (pkgload + testthat)
-        shell: pwsh
+      - name: Run R CMD check (rcmdcheck)
+        # run commands directly rather than mixing 'uses' + 'run'
         run: |
-          Set-Location $env:GITHUB_WORKSPACE
-          Write-Host "Running developer tests from $(Get-Location)"
-          Rscript -e "library(pkgload); library(testthat);
-                      pkgload::load_all(export_all = TRUE, helpers = TRUE);
-                      testthat::test_dir(file.path('tests','testthat'))"
+          Rscript -e "options(repos = c(CRAN = 'https://cran.rstudio.com'))"
+          Rscript -e "message('Running rcmdcheck with --no-examples and --no-tests'); rcmdcheck::rcmdcheck(path='.', args = c('--no-examples','--no-tests'), build_args = c('--no-manual'), check_dir = 'check')"
 
-      - name: Run rcmdcheck but SKIP package tests/examples
-        shell: pwsh
-        run: |
-          Set-Location $env:GITHUB_WORKSPACE
-          Write-Host "Running rcmdcheck with --no-examples and --no-tests"
-          Rscript -e "rcmdcheck::rcmdcheck(path='.', args = c('--no-examples','--no-tests'),
-                                           build_args = c('--no-manual'),
-                                           check_dir = 'check')"
-
-      - name: Upload check results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: R-check-results
-          path: check
