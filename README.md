@@ -120,19 +120,6 @@ test_dir("tests")
 
 ---
 
-## Submission Notes
-
-**Time Spent:** ~4 hours 15 minutes  
-
-**Assumptions**
-- Date column is commonly DD-MM-YYYY and parsed using `lubridate::dmy()` with fallback to `as.Date()`.  
-- Emissions column name may vary; helper normalizes it to `carbon.emission.in.kgco2e`.  
-- Data is aggregated by site + date for plotting and KPI calculations.  
-
-**Improvements with more time**
-- Interactive Plotly charts for zoom and tooltips.  
-- Additional KPIs (normalized emissions per production unit).  
-
 
 
 
